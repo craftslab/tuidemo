@@ -21,7 +21,7 @@ struct App<'a> {
 impl<'a> App<'a> {
     fn new() -> App<'a> {
         App {
-            titles: vec!["Tab0", "Tab1", "Tab2", "Tab3"],
+            titles: vec!["Tasks", "Servers"],
             index: 0,
         }
     }
@@ -73,8 +73,8 @@ fn run<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                KeyCode::Right => app.next(),
                 KeyCode::Left => app.previous(),
+                KeyCode::Right => app.next(),
                 _ => {}
             }
         }
@@ -89,21 +89,16 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
         .split(size);
 
-    let block = Block::default().style(Style::default().bg(Color::White).fg(Color::Black));
+    let block = Block::default().style(Style::default().bg(Color::Black).fg(Color::White));
     f.render_widget(block, size);
+
     let titles = app
         .titles
         .iter()
-        .map(|t| {
-            let (first, rest) = t.split_at(1);
-            Spans::from(vec![
-                Span::styled(first, Style::default().fg(Color::Yellow)),
-                Span::styled(rest, Style::default().fg(Color::Green)),
-            ])
-        })
+        .map(|t| Spans::from(Span::styled(*t, Style::default().fg(Color::Green))))
         .collect();
     let tabs = Tabs::new(titles)
-        .block(Block::default().borders(Borders::ALL).title("Tabs"))
+        .block(Block::default().borders(Borders::ALL).title("tuidemo"))
         .select(app.index)
         .style(Style::default().fg(Color::Cyan))
         .highlight_style(
@@ -112,11 +107,10 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
                 .bg(Color::Black),
         );
     f.render_widget(tabs, chunks[0]);
+
     let inner = match app.index {
-        0 => Block::default().title("Inner 0").borders(Borders::ALL),
-        1 => Block::default().title("Inner 1").borders(Borders::ALL),
-        2 => Block::default().title("Inner 2").borders(Borders::ALL),
-        3 => Block::default().title("Inner 3").borders(Borders::ALL),
+        0 => Block::default().title("Tasks").borders(Borders::ALL),
+        1 => Block::default().title("Servers").borders(Borders::ALL),
         _ => unreachable!(),
     };
     f.render_widget(inner, chunks[1]);
