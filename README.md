@@ -7,6 +7,14 @@
 
 
 
+[![asciicast](https://asciinema.org/a/483195.svg)](https://asciinema.org/a/483195)
+
+> Demo generated with [asciinema](https://github.com/asciinema/asciinema)
+>
+> `asciinema rec && asciinema auth`
+
+
+
 ## Introduction
 
 *tuidemo* is the demo of [tui-rs](https://github.com/fdehau/tui-rs) written in Rust.
