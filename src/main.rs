@@ -8,13 +8,45 @@ use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
+    symbols,
     text::{Span, Spans},
-    widgets::{Block, Borders, Gauge, List, ListItem, ListState, Paragraph, Tabs, Wrap},
+    widgets::canvas::{Canvas, Line, Map, MapResolution},
+    widgets::{
+        Block, Borders, Gauge, List, ListItem, ListState, Paragraph, Row, Table, Tabs, Wrap,
+    },
     Frame, Terminal,
 };
 
 const TASK: [&str; 3] = ["Task1", "Task2", "Task3"];
 const LOG: [(&str, &str); 3] = [("Event1", "INFO"), ("Event2", "WARN"), ("Event3", "ERROR")];
+
+struct Server<'a> {
+    pub host: &'a str,
+    pub location: &'a str,
+    pub coords: (f64, f64),
+    pub status: &'a str,
+}
+
+const SERVER: [Server; 3] = [
+    Server {
+        host: "10.0.0.1",
+        location: "Chengdu",
+        coords: (30.57, 104.07),
+        status: "Up",
+    },
+    Server {
+        host: "10.0.0.2",
+        location: "Shanghai",
+        coords: (31.23, 121.47),
+        status: "Fail",
+    },
+    Server {
+        host: "10.0.0.3",
+        location: "Xi'an",
+        coords: (34.27, 108.95),
+        status: "Up",
+    },
+];
 
 struct App<'a> {
     pub titles: Vec<&'a str>,
@@ -288,6 +320,71 @@ fn draw_text<B: Backend>(f: &mut Frame<B>, _: &App, area: Rect) {
     f.render_widget(paragraph, area);
 }
 
-fn server<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
-    // TODO
+fn server<B: Backend>(f: &mut Frame<B>, _: &App, area: Rect) {
+    let chunks = Layout::default()
+        .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
+        .direction(Direction::Horizontal)
+        .split(area);
+    let up_style = Style::default().fg(Color::Green);
+    let fail_style = Style::default()
+        .fg(Color::Red)
+        .add_modifier(Modifier::RAPID_BLINK | Modifier::CROSSED_OUT);
+    let rows = SERVER.iter().map(|s| {
+        let style = if s.status == "Up" {
+            up_style
+        } else {
+            fail_style
+        };
+        Row::new(vec![s.host, s.location, s.status]).style(style)
+    });
+    let table = Table::new(rows)
+        .header(
+            Row::new(vec!["Server", "Location", "Status"])
+                .style(Style::default().fg(Color::Yellow))
+                .bottom_margin(1),
+        )
+        .block(Block::default().title("Server").borders(Borders::ALL))
+        .widths(&[
+            Constraint::Length(15),
+            Constraint::Length(15),
+            Constraint::Length(10),
+        ]);
+    f.render_widget(table, chunks[0]);
+
+    let map = Canvas::default()
+        .block(Block::default().title("Location").borders(Borders::ALL))
+        .paint(|ctx| {
+            ctx.draw(&Map {
+                color: Color::White,
+                resolution: MapResolution::High,
+            });
+            ctx.layer();
+            for (i, s1) in SERVER.iter().enumerate() {
+                for s2 in &SERVER[i + 1..] {
+                    ctx.draw(&Line {
+                        x1: s1.coords.1,
+                        y1: s1.coords.0,
+                        y2: s2.coords.0,
+                        x2: s2.coords.1,
+                        color: Color::Yellow,
+                    });
+                }
+            }
+            for server in &SERVER {
+                let color = if server.status == "Up" {
+                    Color::Green
+                } else {
+                    Color::Red
+                };
+                ctx.print(
+                    server.coords.1,
+                    server.coords.0,
+                    Span::styled("X", Style::default().fg(color)),
+                );
+            }
+        })
+        .marker(symbols::Marker::Braille)
+        .x_bounds([-180.0, 180.0])
+        .y_bounds([-90.0, 90.0]);
+    f.render_widget(map, chunks[1]);
 }
