@@ -1,0 +1,33 @@
+[package]
+name = "tuidemo"
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.59"
+authors = ["Jia Jia <angersax@sina.com>"]
+description = "tui-rs demo"
+repository = "https://github.com/craftslab/tuidemo"
+documentation = "https://github.com/craftslab/tuidemo"
+homepage = "https://github.com/craftslab/tuidemo"
+keywords = ["demo", "ui"]
+categories = ["rust"]
+license = "Apache-2.0"
+readme = "README.md"
+include = [
+    "src/**/*",
+    "Cargo.toml",
+    "README.md"
+]
+
+[[bin]]
+name = "tuidemo"
+path = "src/main.rs"
+
+[profile.release]
+strip = "debuginfo"
+
+[dependencies]
+tui = { version = "0.17", default-features = false, features = ["crossterm"]}
+crossterm = "0.23"
+
+[badges]
+maintenance = { status = "actively-developed" }

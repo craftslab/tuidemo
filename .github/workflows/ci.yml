@@ -1,0 +1,46 @@
+---
+name: "ci"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  RUST_BACKTRACE: full
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Install component
+        run: make install
+        continue-on-error: false
+      - name: Run lint
+        run: make lint
+        continue-on-error: false
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Install component
+        run: make install
+        continue-on-error: false
+      - name: Run test
+        run: make test
+        continue-on-error: false
+      - name: Upload coverage
+        run: |
+          export build=$(date +%FT%T%z)
+          cargo tarpaulin --ignore-tests --exclude-files mod.rs *_test.rs --out Xml
+          bash <(curl -s https://codecov.io/bash) -X gcov
