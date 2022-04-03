@@ -7,7 +7,7 @@
 
 
 
-[![asciicast](https://asciinema.org/a/483195.svg)](https://asciinema.org/a/483195)
+[![asciicast](https://asciinema.org/a/483808.svg)](https://asciinema.org/a/483808)
 
 > Demo generated with [asciinema](https://github.com/asciinema/asciinema)
 >
