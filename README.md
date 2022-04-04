@@ -32,7 +32,7 @@
 ```bash
 make install
 make build
-./target/x86_64-unknown-linux-musl/release/tuidemo"
+./target/x86_64-unknown-linux-musl/release/tuidemo
 ```
 
 
